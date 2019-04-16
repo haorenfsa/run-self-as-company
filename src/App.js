@@ -1,7 +1,9 @@
 import React from 'react';
 import {
-  Layout, Menu, Breadcrumb, Icon,
+  Layout, Menu, Breadcrumb, Icon, Table, Button
 } from 'antd';
+
+import { getAllPlans, addPlan, deletePlanByID } from './api'
 
 const {
   Header, Content, Footer, Sider,
@@ -11,14 +13,60 @@ const SubMenu = Menu.SubMenu;
 class App extends React.Component {
   state = {
     collapsed: false,
+    plans: [],
   };
+  columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    }, 
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+    }, 
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+    }, 
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+    }, 
+    {
+      title: 'Operation',
+      dataIndex: 'opt',
+      render(text: any, record: T, index: number) {
+        return (<Button onClick={()=>deletePlanByID(record.id)}>删除</Button>)
+      },
+    }
+  ];
 
   onCollapse = (collapsed) => {
     console.log(collapsed);
     this.setState({ collapsed });
   }
 
+  testIndex = 0
+  postNewPlan = () => {
+    this.testIndex++
+    var plan = {
+      name: `test${this.testIndex}`,
+      date: `2018${this.testIndex}`,
+    }
+    addPlan(plan)
+  }
+
+  async componentDidMount() {
+    var res = await getAllPlans()
+    this.setState({ plans: res.data.data })
+  }
+
   render() {
+    const { plans } = this.state;
     return (
       <Layout style={{ minHeight: '100vh' }}>
         <Sider
@@ -64,9 +112,8 @@ class App extends React.Component {
               <Breadcrumb.Item>User</Breadcrumb.Item>
               <Breadcrumb.Item>Bill</Breadcrumb.Item>
             </Breadcrumb>
-            <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
-              Bill is a cat.
-            </div>
+            <Button onClick={this.postNewPlan}> test add new plan </Button>
+            <Table columns={this.columns} dataSource={plans}/>
           </Content>
           <Footer style={{ textAlign: 'center' }}>
             Ant Design ©2018 Created by Ant UED
